@@ -3,7 +3,8 @@ import java.util.*;
 
 class Calculator{
     Map<String, Integer> ops = new HashMap<String, Integer>();
-
+    String regex = "(?<=op)|(?=op)".replace("op", "[-+*/()]");
+    
     Calculator(){
 	ops.put("+", 1);
         ops.put("-", 2);
@@ -11,56 +12,97 @@ class Calculator{
         ops.put("/", 4);
     }
 
-    private String ShuntYard(String infix){
+    private ArrayList ShuntYard(String infix){
 	
-        StringBuilder output = new StringBuilder();
-        Deque<String> stack = new LinkedList<String>();
+    Deque<String> stack = new LinkedList<String>();
 
-        for (String token : infix.split("\\s+")) {
+	infix = infix.replaceAll("\\s+", "");
+	String last = "";
+	boolean negative = false;
+
+	ArrayList <String> tokenList = new ArrayList <String>(Arrays.asList(infix.split(regex)));
+	ArrayList <String> postfix = new ArrayList<String>();
+
+	System.out.println(tokenList);
+
+	if(tokenList.get(0).equals("-")){
+		System.out.println("0 is negative");
+		if(tokenList.get(1).matches("\\d+")){
+			System.out.println("1 is a number");
+			tokenList.set(1, "-" + tokenList.get(1));
+			tokenList.remove(0);
+		}
+	}
+
+	System.out.println(tokenList);
+
+	for(int i = 0; i < tokenList.size(); i ++){
+	    String token = tokenList.get(i);
+	    System.out.println("preprocess token: " + token);
+	    if(negative){
+		if(token.matches("\\d+")){
+		    String replaceToken = "-" + token;
+		    System.out.println("replace: " + replaceToken);
+		    tokenList.set(i, replaceToken);
+		    tokenList.remove(i-1);
+		    negative = false;
+		}
+	    }
+	    if(token.equals("-") && ops.containsKey(last)){
+		System.out.println("negative " + last + " " + token);
+		negative = true;
+	    }
+	    last = token;
+	}
+
+	System.out.println(tokenList);
+	
+	for (String token : tokenList) {
+	    System.out.println(token);
             // operator
             if (ops.containsKey(token)) {
                 while (!stack.isEmpty() && ops.get(token) > ops.get(stack.peek()))
-                    output.append(stack.pop());
+                    postfix.add(stack.pop());
                 stack.push(token);
-
+	    }
                 // left parenthesis
-            } else if (token.equals("(")) {
+           else if (token.equals("(")) {
                 stack.push(token);
-
+	   }
                 // right parenthesis
-            } else if (token.equals(")")) {
+           else if (token.equals(")")) {
                 while (!stack.peek().equals("("))
-                    output.append(stack.pop());
+                    postfix.add(stack.pop());
                 stack.pop();
 
                 // digit
             } else {
-                output.append(token);
+                postfix.add(token);
             }
-        }
-	while(!stack.isEmpty()){
-	    output.append(stack.pop());
 	}
-	return output.toString();
+	while(!stack.isEmpty()){
+	    postfix.add(stack.pop());
+	}
+	System.out.println(postfix);
+	return postfix;
     
     }
     
     public int calculate(String calc)
     {
-	String exp = ShuntYard(calc);
-	
+	ArrayList <String> exp = ShuntYard(calc);
+	System.out.println(exp);
         //create a stack
         Stack<Integer> stack=new Stack<>();
 
         // Scan all characters one by one
-        for(int i=0;i<exp.length();i++)
+        for(String token: exp)
         {
-            char c=exp.charAt(i);
-
             // If the scanned character is an operand (number here),
             // push it to the stack.
-            if(Character.isDigit(c))
-                stack.push(c - '0');
+            if(token.matches("-?\\d+")){
+                stack.push(Integer.valueOf(token));
+	    }
 
                 //  If the scanned character is an operator, pop two
                 // elements from stack apply the operator
@@ -69,21 +111,21 @@ class Calculator{
                 int val1 = stack.pop();
                 int val2 = stack.pop();
 
-                switch(c)
+                switch(token)
                 {
-                    case '+':
+                    case "+":
                         stack.push(val2+val1);
                         break;
 
-                    case '-':
+                    case "-":
                         stack.push(val2- val1);
                         break;
 
-                    case '/':
+                    case "/":
                         stack.push(val2/val1);
                         break;
 
-                    case '*':
+                    case "*":
                         stack.push(val2*val1);
                         break;
                 }
@@ -102,8 +144,10 @@ class Calculator{
 	    if(token.equals("(") || token.equals(")")){
 		parens += 1;
 	    }
-	    if(ops.containsKey(last) && ops.containsKey(token)){
-		return false;
+	    if(ops.containsKey(last) && ops.containsKey(token)){ //if second operand isn't negative then two operators are in a row
+		if(!token.equals("-")){
+		    return false;
+		}
 	    }
 	    if(last.matches("-?\\d+") && token.matches("-?\\d+")){
 		return false;
@@ -129,7 +173,8 @@ class Calculator{
 	    String exp = scan.nextLine();
 	    boolean check = c.checkExpression(exp);
 	    if(exp.equals("exit")){
-		System.exit(1);
+			scan.close();
+			System.exit(1);
 		}
 	    else if(!check){
 		System.out.println("Please enter an expression to be evaluated");
@@ -137,9 +182,8 @@ class Calculator{
 	    else{
 		sum = c.calculate(exp);
 		System.out.println(sum);
-	    }
+	    	}
 	}
-	
-    }
+    }	
 
 }

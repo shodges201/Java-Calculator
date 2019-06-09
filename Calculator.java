@@ -23,42 +23,31 @@ class Calculator{
 	ArrayList <String> tokenList = new ArrayList <String>(Arrays.asList(infix.split(regex)));
 	ArrayList <String> postfix = new ArrayList<String>();
 
-	System.out.println(tokenList);
-
 	if(tokenList.get(0).equals("-")){
-		System.out.println("0 is negative");
 		if(tokenList.get(1).matches("\\d+")){
-			System.out.println("1 is a number");
 			tokenList.set(1, "-" + tokenList.get(1));
 			tokenList.remove(0);
 		}
 	}
 
-	System.out.println(tokenList);
-
 	for(int i = 0; i < tokenList.size(); i ++){
 	    String token = tokenList.get(i);
-	    System.out.println("preprocess token: " + token);
 	    if(negative){
 		if(token.matches("\\d+")){
 		    String replaceToken = "-" + token;
-		    System.out.println("replace: " + replaceToken);
 		    tokenList.set(i, replaceToken);
 		    tokenList.remove(i-1);
 		    negative = false;
 		}
 	    }
 	    if(token.equals("-") && ops.containsKey(last)){
-		System.out.println("negative " + last + " " + token);
-		negative = true;
+			negative = true;
 	    }
 	    last = token;
 	}
 
-	System.out.println(tokenList);
 	
 	for (String token : tokenList) {
-	    System.out.println(token);
             // operator
             if (ops.containsKey(token)) {
                 while (!stack.isEmpty() && ops.get(token) > ops.get(stack.peek()))
@@ -83,7 +72,6 @@ class Calculator{
 	while(!stack.isEmpty()){
 	    postfix.add(stack.pop());
 	}
-	System.out.println(postfix);
 	return postfix;
     
     }
@@ -91,7 +79,6 @@ class Calculator{
     public int calculate(String calc)
     {
 	ArrayList <String> exp = ShuntYard(calc);
-	System.out.println(exp);
         //create a stack
         Stack<Integer> stack=new Stack<>();
 
@@ -154,8 +141,6 @@ class Calculator{
 	    }
 	    last = token;
 	}
-	System.out.print("num parens: ");
-	System.out.println(parens);
 	if(parens % 2 != 0){
 	    return false;
 	}
@@ -165,7 +150,7 @@ class Calculator{
     public static void main(String[] args){
 	Calculator c = new Calculator();
 	Scanner scan = new Scanner(System.in);
-	System.out.println("When Prompted, enter an expression to be calculated or type 'exit' to quit. Please seperate each item in the expression by a space");
+	System.out.println("When Prompted, enter an expression to be calculated or type 'exit' to quit.");
 	int sum = 0;
 	while(true){
 	    sum = 0;

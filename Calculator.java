@@ -1,21 +1,49 @@
 import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
 
-
-class Calculator{
+public class Calculator extends Frame implements ActionListener{
     Map<String, Integer> ops = new HashMap<String, Integer>();
-    String regex = "(?<=op)|(?=op)".replace("op", "[-+*/()]");
+	String regex = "(?<=op)|(?=op)".replace("op", "[-+*/()]");
+	private Label label;
+	private Button calcButton;
+	private TextField editText;
+	int sum;
     
-    Calculator(){
-	ops.put("+", 1);
-        ops.put("-", 2);
+	Calculator(){
+		
+		setLayout(new GridLayout(1, 2));
+		editText = new TextField("0");
+		//editText.setColumns(10);
+		editText.setEditable(true);
+		add(editText);
+		calcButton =  new Button("calculate");
+		add(calcButton);
+		calcButton.addActionListener(this);
+		setTitle("Calculator");
+		setVisible(true);
+		setSize(500, 200);
+
+		ops.put("+", 1);
+    	ops.put("-", 2);
         ops.put("*", 3);
-        ops.put("/", 4);
+		ops.put("/", 4);
+		sum = 0;
+		
+		//makes exiting out of GUI window quit program also
+		addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+				dispose();
+				System.exit(0);
+            }
+        });
     }
 
     private ArrayList ShuntYard(String infix){
 	
-    Deque<String> stack = new LinkedList<String>();
-
+	Deque<String> stack = new LinkedList<String>();
+	
+	//removes all white space between items -> allows for >= 0 spaces between items
 	infix = infix.replaceAll("\\s+", "");
 	String last = "";
 	boolean negative = false;
@@ -148,7 +176,23 @@ class Calculator{
     }
 
     public static void main(String[] args){
-	Calculator c = new Calculator();
+		Calculator c = new Calculator();
+	}
+
+	public void actionPerformed(ActionEvent event){
+		String eq = editText.getText();
+		boolean check = checkExpression(eq);
+	    if(!check){
+			editText.setText("0");
+	    }
+	    else{
+			sum = calculate(eq);
+			editText.setText(Integer.toString(sum));
+	    	}
+	}
+			
+		
+	/*
 	Scanner scan = new Scanner(System.in);
 	System.out.println("When Prompted, enter an expression to be calculated or type 'exit' to quit.");
 	int sum = 0;
@@ -169,6 +213,6 @@ class Calculator{
 		System.out.println(sum);
 	    	}
 	}
-    }	
+    }	*/
 
 }
